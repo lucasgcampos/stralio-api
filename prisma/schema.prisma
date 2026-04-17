@@ -24,3 +24,46 @@ model Role {
     name        String
     users       User[]
 }
+
+model SorobanContract {
+    id          String   @id @db.VarChar(26)
+    name        String
+    contractId  String   @unique @db.VarChar(56)
+    enabled     Boolean  @default(true)
+    events      SorobanEvent[]
+    webhooks    WebhookSubscription[]
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+}
+
+model SorobanEvent {
+    id          String   @id @db.VarChar(26)
+    eventId     String   @unique @db.VarChar(64)
+    contract    SorobanContract @relation(fields: [contractId], references: [id])
+    contractId  String   @db.VarChar(56)
+    topic       String
+    eventType   String
+    ledger      Int
+    timestamp   DateTime
+    data        Json
+    processed   Boolean  @default(false)
+    createdAt   DateTime @default(now())
+}
+
+model WebhookSubscription {
+    id          String   @id @db.VarChar(26)
+    contract    SorobanContract @relation(fields: [contractId], references: [id])
+    contractId  String   @db.VarChar(56)
+    url         String   @db.VarChar(512)
+    enabled     Boolean  @default(true)
+    lastTriggered DateTime?
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+}
+
+model EventIngestState {
+    id          String   @id @db.VarChar(26)
+    lastLedger  Int
+    cursor      String?
+    updatedAt   DateTime @updatedAt
+}
