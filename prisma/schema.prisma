@@ -66,3 +66,19 @@ model EventIngestState {
     cursor      String?
     updatedAt   DateTime @updatedAt
 }
+
+model TtsLog {
+  id           String    @id @db.VarChar(26)
+  operationId  String    @unique @db.VarChar(26)
+  text         String    @db.Text
+  provider     String    @db.VarChar(32)
+  filePath     String?   @db.VarChar(512)
+  status       TtsStatus
+  errorCode    String?   @db.VarChar(64)
+  createdAt    DateTime  @default(now())
+}
+
+enum TtsStatus {
+  SUCCESS
+  FAILED
+}
