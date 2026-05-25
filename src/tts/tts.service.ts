@@ -62,11 +62,11 @@ export class TtsService implements OnModuleInit {
   // Public API
   // ---------------------------------------------------------------------------
 
-  async speak(dto: SpeakDto): Promise<{ operationId: string }> {
+  async speak(text: string, voiceId?: string, obsScene?: string): Promise<{ operationId: string }> {
     const operationId = ulid();
 
     // Fire-and-forget: do not await the pipeline
-    this.runPipeline(operationId, dto).catch((err) => {
+    this.runPipeline(operationId, text, voiceId, obsScene).catch((err) => {
       // runPipeline handles its own error logging and DB persistence;
       // this catch is a safety net for unexpected throws outside the try/catch.
       this.logger.error(
@@ -101,7 +101,7 @@ export class TtsService implements OnModuleInit {
   // Private pipeline
   // ---------------------------------------------------------------------------
 
-  private async runPipeline(operationId: string, dto: SpeakDto): Promise<void> {
+  private async runPipeline(operationId: string, text: string, voiceIdParam?: string, obsScene?: string): Promise<void> {
     
     const provider = this.config.get<string>('TTS_PROVIDER') ?? 'unknown';
     const outputDir = this.getOutputDir();
@@ -113,11 +113,11 @@ export class TtsService implements OnModuleInit {
     try {
       // 1. Synthesize audio
       const voiceId =
-        dto.voiceId ?? this.config.get<string>('TTS_DEFAULT_VOICE_ID');
+        voiceIdParam ?? this.config.get<string>('TTS_DEFAULT_VOICE_ID');
 
       let audioBuffer: Buffer;
       try {
-        audioBuffer = await this.providerFactory.create().synthesize(dto.text, voiceId);
+        audioBuffer = await this.providerFactory.create().synthesize(text, voiceId);
       } catch (err) {
         const code =
           err instanceof TtsException ? err.code : 'TTS_PROVIDER_UNAVAILABLE';
@@ -140,7 +140,7 @@ export class TtsService implements OnModuleInit {
       }
 
       // 3. Trigger OBS playback
-      await this.obsService.playAudio(filePath, dto.obsScene);
+      await this.obsService.playAudio(filePath, obsScene);
 
       // 4. Delete the audio file (best-effort, after OBS trigger is sent)
       this.deleteFile(filePath);

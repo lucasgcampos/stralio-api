@@ -29,7 +29,7 @@ export class TtsController {
   // @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.ACCEPTED)
   async speak(@Body() dto: SpeakDto): Promise<{ operationId: string }> {
-    return this.ttsService.speak(dto);
+    return this.ttsService.speak(dto.text, dto.voiceId, dto.obsScene);
   }
 
   /**

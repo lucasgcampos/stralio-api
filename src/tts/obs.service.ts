@@ -46,19 +46,7 @@ export class ObsService {
         );
       }
 
-      // Trigger playback
-      try {
-        await obs.call('TriggerMediaInputAction', {
-          inputName: sourceName,
-          mediaAction: 'OBS_WEBSOCKET_MEDIA_INPUT_ACTION_RESTART',
-        });
-      } catch (err) {
-        throw new TtsException(
-          'OBS_COMMAND_ERROR',
-          `Failed to trigger media input action: ${(err as Error).message}`,
-          err,
-        );
-      }
+      await new Promise(r => setTimeout(r, 500));
     } finally {
       await obs.disconnect();
     }

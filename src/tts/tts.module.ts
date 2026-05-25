@@ -19,5 +19,6 @@ import { EdgeTtsProvider } from './providers/edge-tts.provider';
     // OpenAiProvider,
     EdgeTtsProvider,
   ],
+  exports: [TtsService]
 })
 export class TtsModule {}
