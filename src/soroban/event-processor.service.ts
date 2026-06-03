@@ -37,13 +37,10 @@ export class EventProcessorService {
 
     const body = scValToNative(event.value);
     const topics = event.topic.map(topic => scValToNative(topic));
-    //TODO: temporary
-    const message = 'Ola mundo, seja bem vindo!'; 
-
-    const amount = BigInt(body) / BigInt(10000000) ;
+    const amount = BigInt(body.amount) / BigInt(10000000) ;
     
     await this.ttsService.speak(
-      `Marco Aurélio enviou ${amount} XML: ${message}`,
+      `${body.username} enviou ${amount} XML: ${body.message}`,
       undefined,
       'Scene'
     );
