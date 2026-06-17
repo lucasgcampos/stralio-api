@@ -61,6 +61,7 @@ describe('UsersService', () => {
         password: 'rawpassword',
         name: 'Test User',
         document: '12345678900',
+        roleId: 'role-id',
       };
 
       mockHashService.createHash.mockResolvedValue('hashedpassword');
