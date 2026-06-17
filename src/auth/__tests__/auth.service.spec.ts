@@ -1,7 +1,5 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { AuthService } from '../auth.service';
-import { JwtService } from '@nestjs/jwt';
 import { UnauthorizedException } from '@nestjs/common';
+import { AuthService } from '../auth.service';
 
 describe('AuthService', () => {
   let authService: any;
@@ -51,7 +49,9 @@ describe('AuthService', () => {
       });
 
       expect(result).toHaveProperty('access_token', 'test-jwt-token');
-      expect(mockJwtService.sign).toHaveBeenCalledWith({ sub: mockUser.personId });
+      expect(mockJwtService.sign).toHaveBeenCalledWith({
+        sub: mockUser.personId,
+      });
     });
 
     it('should throw UnauthorizedException when user not found', async () => {

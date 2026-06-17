@@ -1,8 +1,23 @@
-import { NotFoundException, ConflictException } from '@nestjs/common';
+import { UsersService } from '../users.service';
+import { PrismaService } from 'src/shared/prisma/prisma.service';
+import { HashService } from 'src/shared/hash.service';
 
-// Mock the UsersService without importing it
 describe('UsersService', () => {
-  let mockPrisma: any;
+  let service: UsersService;
+  let mockPrisma: {
+    user: {
+      findUnique: jest.Mock;
+      findFirst: jest.Mock;
+      findMany: jest.Mock;
+      create: jest.Mock;
+      update: jest.Mock;
+      delete: jest.Mock;
+    };
+  };
+  let mockHashService: {
+    createHash: jest.Mock;
+    verify: jest.Mock;
+  };
 
   const mockUser = {
     id: 'test-user-id',
@@ -20,103 +35,89 @@ describe('UsersService', () => {
     mockPrisma = {
       user: {
         findUnique: jest.fn(),
+        findFirst: jest.fn(),
         findMany: jest.fn(),
         create: jest.fn(),
         update: jest.fn(),
         delete: jest.fn(),
       },
-      role: {
-        findUnique: jest.fn(),
-      },
     };
-    jest.clearAllMocks();
+
+    mockHashService = {
+      createHash: jest.fn(),
+      verify: jest.fn(),
+    };
+
+    service = new UsersService(
+      mockPrisma as unknown as PrismaService,
+      mockHashService as unknown as HashService,
+    );
   });
 
-  // We'll test the logic inline without importing the actual service
-  // This avoids NestJS DI complexity
+  describe('create', () => {
+    it('should create a user with hashed password', async () => {
+      const createInput = {
+        email: 'test@example.com',
+        password: 'rawpassword',
+        name: 'Test User',
+        document: '12345678900',
+      };
 
-  describe('findByEmail', () => {
-    it('should return user when email exists', async () => {
-      mockPrisma.user.findUnique.mockResolvedValue(mockUser);
+      mockHashService.createHash.mockResolvedValue('hashedpassword');
+      mockPrisma.user.create.mockResolvedValue(mockUser as any);
 
-      // Simulate the service method
-      const result = await mockPrisma.user.findUnique({
-        where: { email: 'test@example.com' },
+      const result = await service.create(createInput as any);
+
+      expect(mockHashService.createHash).toHaveBeenCalledWith('rawpassword');
+      expect(mockPrisma.user.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({
+          email: 'test@example.com',
+          name: 'Test User',
+          password: 'hashedpassword',
+        }),
       });
-
       expect(result).toEqual(mockUser);
-      expect(mockPrisma.user.findUnique).toHaveBeenCalledWith({
-        where: { email: 'test@example.com' },
-      });
-    });
-
-    it('should return null when email does not exist', async () => {
-      mockPrisma.user.findUnique.mockResolvedValue(null);
-
-      const result = await mockPrisma.user.findUnique({
-        where: { email: 'nonexistent@example.com' },
-      });
-
-      expect(result).toBeNull();
-    });
-  });
-
-  describe('findById', () => {
-    it('should return user when id exists', async () => {
-      mockPrisma.user.findUnique.mockResolvedValue(mockUser);
-
-      const result = await mockPrisma.user.findUnique({
-        where: { id: 'test-user-id' },
-      });
-
-      expect(result).toEqual(mockUser);
-    });
-
-    it('should return null when id does not exist', async () => {
-      mockPrisma.user.findUnique.mockResolvedValue(null);
-
-      const result = await mockPrisma.user.findUnique({
-        where: { id: 'nonexistent-id' },
-      });
-
-      expect(result).toBeNull();
     });
   });
 
   describe('findAll', () => {
-    it('should return array of users', async () => {
+    it('should return all users', async () => {
       mockPrisma.user.findMany.mockResolvedValue([mockUser]);
 
-      const result = await mockPrisma.user.findMany();
+      const result = await service.findAll();
 
+      expect(mockPrisma.user.findMany).toHaveBeenCalled();
       expect(result).toHaveLength(1);
       expect(result[0]).toEqual(mockUser);
     });
+
+    it('should return empty array when no users exist', async () => {
+      mockPrisma.user.findMany.mockResolvedValue([]);
+
+      const result = await service.findAll();
+
+      expect(result).toHaveLength(0);
+    });
   });
 
-  describe('create user validation', () => {
-    it('should require email', async () => {
-      const createUserDto = {
-        email: '',
-        password: 'password123',
-        name: 'Test',
-        document: '12345678900',
-      };
+  describe('findOne', () => {
+    it('should return user by personId', async () => {
+      mockPrisma.user.findFirst.mockResolvedValue(mockUser as any);
 
-      // Validation should reject empty email
-      expect(createUserDto.email).toBe('');
+      const result = await service.findOne('person-123');
+
+      expect(mockPrisma.user.findFirst).toHaveBeenCalledWith({
+        where: { personId: 'person-123' },
+      });
+      expect(result).toEqual(mockUser);
     });
 
-    it('should require password', async () => {
-      const createUserDto = {
-        email: 'test@example.com',
-        password: '',
-        name: 'Test',
-        document: '12345678900',
-      };
+    it('should return null when user not found', async () => {
+      mockPrisma.user.findFirst.mockResolvedValue(null);
 
-      // Validation should reject empty password
-      expect(createUserDto.password).toBe('');
+      const result = await service.findOne('nonexistent');
+
+      expect(result).toBeNull();
     });
   });
 });

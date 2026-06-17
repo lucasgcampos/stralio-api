@@ -37,23 +37,29 @@ describe('TtsProviderFactory', () => {
     });
 
     it('should return OpenAI provider when configured', () => {
-      const openAiConfig = new ConfigService({ TTS_PROVIDER: 'openai', TTS_PROVIDER_API_KEY: 'key' });
+      const openAiConfig = new ConfigService({
+        TTS_PROVIDER: 'openai',
+        TTS_PROVIDER_API_KEY: 'key',
+      });
       const openAiFactory = new TtsProviderFactory(openAiConfig);
       const provider = openAiFactory.create();
       expect(provider).toBeInstanceOf(OpenAiProvider);
     });
   });
 
-  describe('synthesize', () => {
-    it('should call provider synthesize method', async () => {
-      const mockBuffer = Buffer.from('mock-audio');
-      const provider = factory.create();
-      jest.spyOn(provider, 'synthesize').mockResolvedValue(mockBuffer);
+  describe('create', () => {
+    it('should throw error for unknown provider', () => {
+      const unknownConfig = new ConfigService({ TTS_PROVIDER: 'unknown' });
+      const unknownFactory = new TtsProviderFactory(unknownConfig);
 
-      const result = await provider.synthesize('Hello world');
+      expect(() => unknownFactory.create()).toThrow('Unknown TTS_PROVIDER');
+    });
 
-      expect(result).toEqual(mockBuffer);
-      expect(provider.synthesize).toHaveBeenCalledWith('Hello world');
+    it('should throw error when no provider configured', () => {
+      const emptyConfig = new ConfigService({});
+      const emptyFactory = new TtsProviderFactory(emptyConfig);
+
+      expect(() => emptyFactory.create()).toThrow('Unknown TTS_PROVIDER');
     });
   });
 });
