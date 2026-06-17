@@ -12,4 +12,4 @@ import { TtsModule } from '../tts/tts.module';
   providers: [SorobanService, EventProcessorService, WebhookService],
   exports: [SorobanService],
 })
-export class SorobanModule { }
+export class SorobanModule {}

@@ -9,7 +9,14 @@ import { SorobanModule } from './soroban/soroban.module';
 import { TtsModule } from './tts/tts.module';
 
 @Module({
-  imports: [ConfigModule.forRoot({ isGlobal: true }), SharedModule, UsersModule, AuthModule, SorobanModule, TtsModule],
+  imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
+    SharedModule,
+    UsersModule,
+    AuthModule,
+    SorobanModule,
+    TtsModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })

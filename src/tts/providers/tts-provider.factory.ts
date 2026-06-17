@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ITtsProvider } from './tts-provider.interface';
-import { ElevenLabsProvider } from './elevenlabs.provider';
 import { OpenAiProvider } from './openai.provider';
 import { EdgeTtsProvider } from './edge-tts.provider';
 
@@ -13,7 +12,7 @@ export class TtsProviderFactory {
     const provider = this.config.get<string>('TTS_PROVIDER');
     switch (provider) {
       // case 'elevenlabs':
-        // return new ElevenLabsProvider(this.config);
+      // return new ElevenLabsProvider(this.config);
       case 'openai':
         return new OpenAiProvider(this.config);
       case 'edge-tts':

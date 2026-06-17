@@ -46,7 +46,7 @@ export class ObsService {
         );
       }
 
-      await new Promise(r => setTimeout(r, 500));
+      await new Promise((r) => setTimeout(r, 500));
     } finally {
       await obs.disconnect();
     }

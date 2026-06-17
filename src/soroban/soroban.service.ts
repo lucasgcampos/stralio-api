@@ -1,4 +1,9 @@
-import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  OnModuleInit,
+  OnModuleDestroy,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Server } from '@stellar/stellar-sdk/rpc';
 import { PrismaService } from '../shared/prisma/prisma.service';
@@ -18,12 +23,16 @@ export class SorobanService implements OnModuleInit, OnModuleDestroy {
     private readonly prisma: PrismaService,
     private readonly eventProcessor: EventProcessorService,
   ) {
-    const rpcUrl = this.configService.get<string>('STELLAR_RPC_URL') || 'https://soroban-testnet.stellar.org';
+    const rpcUrl =
+      this.configService.get<string>('STELLAR_RPC_URL') ||
+      'https://soroban-testnet.stellar.org';
     this.server = new Server(rpcUrl);
-    this.pollInterval = parseInt(this.configService.get<string>('SOROBAN_POLL_INTERVAL') || '5000');
+    this.pollInterval = parseInt(
+      this.configService.get<string>('SOROBAN_POLL_INTERVAL') || '5000',
+    );
   }
 
-  async onModuleInit() {
+  onModuleInit() {
     this.startPolling();
   }
 
@@ -53,7 +62,9 @@ export class SorobanService implements OnModuleInit, OnModuleDestroy {
   }
 
   async addWebhook(contractId: string, url: string) {
-    const contract = await this.prisma.sorobanContract.findUnique({ where: { id: contractId } });
+    const contract = await this.prisma.sorobanContract.findUnique({
+      where: { id: contractId },
+    });
     if (!contract) {
       throw new Error('Contract not found');
     }
@@ -79,17 +90,19 @@ export class SorobanService implements OnModuleInit, OnModuleDestroy {
   }
 
   private startPolling() {
-    this.poll();
+    void this.poll();
   }
 
   private async poll() {
     try {
       await this.fetchAndProcessEvents();
     } catch (error) {
-      this.logger.error(`Polling error: ${error.message}`);
+      this.logger.error(`Polling error: ${(error as Error).message}`);
     }
 
-    this.pollingTimer = setTimeout(() => this.poll(), this.pollInterval);
+    this.pollingTimer = setTimeout(() => {
+      void this.poll();
+    }, this.pollInterval);
   }
 
   private async fetchAndProcessEvents() {
@@ -97,7 +110,7 @@ export class SorobanService implements OnModuleInit, OnModuleDestroy {
       where: { enabled: true },
     });
 
-    if (contracts.length === 0) {  
+    if (contracts.length === 0) {
       return;
     }
 
@@ -114,16 +127,20 @@ export class SorobanService implements OnModuleInit, OnModuleDestroy {
       try {
         const response = await this.server.getEvents({
           startLedger,
-          filters: [{
-            type: 'contract',
-            contractIds: [contract.contractId],
-          }],
+          filters: [
+            {
+              type: 'contract',
+              contractIds: [contract.contractId],
+            },
+          ],
           limit: 100,
           // cursor: state?.cursor || undefined,
         });
 
         if (response.events.length > 0) {
-          this.logger.debug(`Found ${response.events.length} events for ${contract.name}`);
+          this.logger.debug(
+            `Found ${response.events.length} events for ${contract.name}`,
+          );
           await this.eventProcessor.processEvents(contract.id, response.events);
         }
 
@@ -131,7 +148,9 @@ export class SorobanService implements OnModuleInit, OnModuleDestroy {
           await this.updateIngestState(response.latestLedger, response.cursor);
         }
       } catch (error) {
-        this.logger.error(`Failed to fetch events for ${contract.name}: ${error.message}`);
+        this.logger.error(
+          `Failed to fetch events for ${contract.name}: ${(error as Error).message}`,
+        );
       }
     }
   }

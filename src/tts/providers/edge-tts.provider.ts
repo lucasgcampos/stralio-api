@@ -13,12 +13,17 @@ export class EdgeTtsProvider implements ITtsProvider {
 
   async synthesize(text: string, voiceId?: string): Promise<Buffer> {
     const voice =
-      voiceId ?? this.config.get<string>('TTS_DEFAULT_VOICE_ID') ?? DEFAULT_VOICE;
+      voiceId ??
+      this.config.get<string>('TTS_DEFAULT_VOICE_ID') ??
+      DEFAULT_VOICE;
 
     const tts = new MsEdgeTTS();
 
     try {
-      await tts.setMetadata(voice, OUTPUT_FORMAT.AUDIO_24KHZ_96KBITRATE_MONO_MP3);
+      await tts.setMetadata(
+        voice,
+        OUTPUT_FORMAT.AUDIO_24KHZ_96KBITRATE_MONO_MP3,
+      );
     } catch (err) {
       throw new TtsException(
         'TTS_PROVIDER_UNAVAILABLE',
