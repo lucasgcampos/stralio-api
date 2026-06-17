@@ -15,7 +15,7 @@ describe('AuthService', () => {
     password: 'hashedpassword',
   };
 
-  beforeEach(async () => {
+beforeEach(() => {
     mockPrisma = {
       user: {
         findFirst: jest.fn(),
