@@ -125,11 +125,7 @@ describe('SorobanService', () => {
       mockPrisma.sorobanContract.findUnique.mockResolvedValue(mockContract);
       mockPrisma.webhookSubscription.create.mockResolvedValue(webhook);
 
-      const result = await service.addWebhook(
-        'contract-id',
-        'https://example.com',
-      );
-
+      await service.addWebhook('contract-id', 'https://example.com');
       expect(mockPrisma.webhookSubscription.create).toHaveBeenCalledWith({
         data: expect.objectContaining({
           contractId: mockContract.contractId,
