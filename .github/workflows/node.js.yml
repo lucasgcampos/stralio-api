@@ -24,6 +24,10 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
       - run: npm ci
+      - name: Generate Prisma Client
+        env:
+          DATABASE_URL: postgresql://prisma@localhost:5432/stralio?schema=public
+        run: npx prisma generate
       - name: Run linter
         run: npx eslint "{src,apps,libs,test}/**/*.ts"
       - name: Check formatting
