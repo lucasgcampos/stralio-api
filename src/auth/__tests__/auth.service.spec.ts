@@ -1,11 +1,14 @@
 import { UnauthorizedException } from '@nestjs/common';
 import { AuthService } from '../auth.service';
+import { PrismaService } from 'src/shared/prisma/prisma.service';
+import { HashService } from 'src/shared/hash.service';
+import { JwtService } from '@nestjs/jwt';
 
 describe('AuthService', () => {
-  let authService: any;
-  let mockPrisma: any;
-  let mockHashService: any;
-  let mockJwtService: any;
+  let authService: AuthService;
+  let mockPrisma: { user: { findFirst: jest.Mock } };
+  let mockHashService: { verify: jest.Mock };
+  let mockJwtService: { sign: jest.Mock };
 
   const mockUser = {
     id: 'test-user-id',
@@ -15,7 +18,7 @@ describe('AuthService', () => {
     password: 'hashedpassword',
   };
 
-beforeEach(() => {
+  beforeEach(() => {
     mockPrisma = {
       user: {
         findFirst: jest.fn(),
@@ -30,8 +33,11 @@ beforeEach(() => {
       sign: jest.fn().mockReturnValue('test-jwt-token'),
     };
 
-    // Create a simple test instance without full NestJS DI
-    authService = new AuthService(mockPrisma, mockJwtService, mockHashService);
+    authService = new AuthService(
+      mockPrisma as unknown as PrismaService,
+      mockJwtService as unknown as JwtService,
+      mockHashService as unknown as HashService,
+    );
   });
 
   it('should be defined', () => {
@@ -48,7 +54,7 @@ beforeEach(() => {
         password: 'password123',
       });
 
-      expect(result).toHaveProperty('access_token', 'test-jwt-token');
+      expect(result).toMatchObject({ access_token: 'test-jwt-token' });
       expect(mockJwtService.sign).toHaveBeenCalledWith({
         sub: mockUser.personId,
       });
