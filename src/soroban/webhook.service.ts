@@ -38,13 +38,17 @@ export class WebhookService {
         }
 
         throw new Error(`HTTP ${response.status}`);
-      } catch (error) {
+      } catch {
         if (attempt === maxRetries) {
-          this.logger.error(`Webhook failed after ${maxRetries} attempts: ${url}`);
+          this.logger.error(
+            `Webhook failed after ${maxRetries} attempts: ${url}`,
+          );
           return;
         }
         const delay = Math.pow(2, attempt - 1) * 1000;
-        this.logger.warn(`Webhook attempt ${attempt} failed, retrying in ${delay}ms`);
+        this.logger.warn(
+          `Webhook attempt ${attempt} failed, retrying in ${delay}ms`,
+        );
         await new Promise((resolve) => setTimeout(resolve, delay));
       }
     }

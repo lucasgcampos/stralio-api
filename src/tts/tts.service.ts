@@ -6,7 +6,6 @@ import { ulid } from 'ulid';
 import { PrismaService } from '../shared/prisma/prisma.service';
 import { ObsService } from './obs.service';
 import { TtsProviderFactory } from './providers/tts-provider.factory';
-import { SpeakDto } from './dto/speak.dto';
 import { HealthResponseDto } from './dto/health-response.dto';
 import { TtsException } from './exceptions/tts.exception';
 
@@ -62,7 +61,11 @@ export class TtsService implements OnModuleInit {
   // Public API
   // ---------------------------------------------------------------------------
 
-  async speak(text: string, voiceId?: string, obsScene?: string): Promise<{ operationId: string }> {
+  speak(
+    text: string,
+    voiceId?: string,
+    obsScene?: string,
+  ): Promise<{ operationId: string }> {
     const operationId = ulid();
 
     // Fire-and-forget: do not await the pipeline
@@ -75,7 +78,7 @@ export class TtsService implements OnModuleInit {
       );
     });
 
-    return { operationId };
+    return Promise.resolve({ operationId });
   }
 
   async getLogs(limit: number): Promise<object[]> {
@@ -101,9 +104,12 @@ export class TtsService implements OnModuleInit {
   // Private pipeline
   // ---------------------------------------------------------------------------
 
-  private async runPipeline(operationId: string, text: string, voiceIdParam?: string, obsScene?: string): Promise<void> {
-    
-    const provider = this.config.get<string>('TTS_PROVIDER') ?? 'unknown';
+  private async runPipeline(
+    operationId: string,
+    text: string,
+    voiceIdParam?: string,
+    obsScene?: string,
+  ): Promise<void> {
     const outputDir = this.getOutputDir();
     const fileName = `${operationId}.mp3`;
     const filePath = path.join(outputDir, fileName);
@@ -117,7 +123,9 @@ export class TtsService implements OnModuleInit {
 
       let audioBuffer: Buffer;
       try {
-        audioBuffer = await this.providerFactory.create().synthesize(text, voiceId);
+        audioBuffer = await this.providerFactory
+          .create()
+          .synthesize(text, voiceId);
       } catch (err) {
         const code =
           err instanceof TtsException ? err.code : 'TTS_PROVIDER_UNAVAILABLE';
@@ -157,8 +165,7 @@ export class TtsService implements OnModuleInit {
       //   },
       // });
     } catch (err) {
-      errorCode =
-        err instanceof TtsException ? err.code : 'UNKNOWN_ERROR';
+      errorCode = err instanceof TtsException ? err.code : 'UNKNOWN_ERROR';
 
       this.logger.error(
         `Pipeline failed for operationId=${operationId} [${errorCode}]: ${(err as Error).message}`,

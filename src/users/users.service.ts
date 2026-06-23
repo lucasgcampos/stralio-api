@@ -6,11 +6,10 @@ import { HashService } from 'src/shared/hash.service';
 
 @Injectable()
 export class UsersService {
-
   constructor(
     private readonly prisma: PrismaService,
-    private readonly crypto: HashService
-  ) { }
+    private readonly crypto: HashService,
+  ) {}
 
   async create(user: Prisma.UserUncheckedCreateInput) {
     const password = await this.crypto.createHash(user.password);
@@ -23,7 +22,7 @@ export class UsersService {
         password: password,
         document: user.document,
         roleId: user.roleId,
-      }
+      },
     });
   }
 
@@ -34,8 +33,8 @@ export class UsersService {
   findOne(personId: string) {
     return this.prisma.user.findFirst({
       where: {
-        personId: personId
-      }
-    })
+        personId: personId,
+      },
+    });
   }
 }

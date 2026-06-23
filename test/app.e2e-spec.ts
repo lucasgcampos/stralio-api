@@ -1,4 +1,7 @@
+import dotenv from 'dotenv';
 import { Test, TestingModule } from '@nestjs/testing';
+
+dotenv.config({ path: './.env.test' });
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { App } from 'supertest/types';
@@ -14,6 +17,10 @@ describe('AppController (e2e)', () => {
 
     app = moduleFixture.createNestApplication();
     await app.init();
+  });
+
+  afterEach(async () => {
+    await app.close();
   });
 
   it('/ (GET)', () => {

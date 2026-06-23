@@ -5,10 +5,7 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
-
-  constructor(
-    private config: ConfigService, 
-) {
+  constructor(private config: ConfigService) {
     const secret = config.get<string>('JWT_SECRET');
 
     if (!secret) {
@@ -22,7 +19,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     });
   }
 
-  async validate(payload: any) {
+  validate(payload: { sub: string; email: string }) {
     return { id: payload.sub, email: payload.email };
   }
 }

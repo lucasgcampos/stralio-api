@@ -1,6 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { ElevenLabsClient, ElevenLabsError, ElevenLabsTimeoutError } from 'elevenlabs';
+import {
+  ElevenLabsClient,
+  ElevenLabsError,
+  ElevenLabsTimeoutError,
+} from 'elevenlabs';
 import { ITtsProvider } from './tts-provider.interface';
 import { TtsException } from '../exceptions/tts.exception';
 
@@ -16,9 +20,12 @@ export class ElevenLabsProvider implements ITtsProvider {
 
   async synthesize(text: string, voiceId?: string): Promise<Buffer> {
     const voice =
-      voiceId ?? this.config.get<string>('TTS_DEFAULT_VOICE_ID') ?? '21m00Tcm4TlvDq8ikWAM';
+      voiceId ??
+      this.config.get<string>('TTS_DEFAULT_VOICE_ID') ??
+      '21m00Tcm4TlvDq8ikWAM';
     const modelId =
-      this.config.get<string>('TTS_ELEVENLABS_MODEL_ID') ?? 'eleven_multilingual_v2';
+      this.config.get<string>('TTS_ELEVENLABS_MODEL_ID') ??
+      'eleven_multilingual_v2';
 
     let audioStream: NodeJS.ReadableStream;
 
@@ -97,7 +104,7 @@ export class ElevenLabsProvider implements ITtsProvider {
     if (isNetworkError) {
       return new TtsException(
         'TTS_PROVIDER_UNAVAILABLE',
-        `ElevenLabs network error: ${(err as Error).message}`,
+        `ElevenLabs network error: ${err.message}`,
         err,
       );
     }

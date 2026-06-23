@@ -7,12 +7,12 @@ import { UseGuards } from '@nestjs/common';
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
-  
+
   @Post()
   create(@Body() createUserDto: Prisma.UserUncheckedCreateInput) {
     return this.usersService.create(createUserDto);
   }
-  
+
   @UseGuards(JwtAuthGuard)
   @Get()
   findAll() {

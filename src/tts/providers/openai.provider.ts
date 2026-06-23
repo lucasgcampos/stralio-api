@@ -21,10 +21,10 @@ export class OpenAiProvider implements ITtsProvider {
   }
 
   async synthesize(text: string, voiceId?: string): Promise<Buffer> {
-    const voice =
-      (voiceId ?? this.config.get<string>('TTS_DEFAULT_VOICE_ID') ?? 'alloy') as OpenAI.Audio.Speech.SpeechCreateParams['voice'];
-    const model =
-      this.config.get<string>('TTS_OPENAI_MODEL') ?? 'tts-1';
+    const voice = (voiceId ??
+      this.config.get<string>('TTS_DEFAULT_VOICE_ID') ??
+      'alloy') as OpenAI.Audio.Speech.SpeechCreateParams['voice'];
+    const model = this.config.get<string>('TTS_OPENAI_MODEL') ?? 'tts-1';
 
     let response: Response;
 
@@ -73,7 +73,10 @@ export class OpenAiProvider implements ITtsProvider {
       );
     }
 
-    if (err instanceof AuthenticationError || err instanceof PermissionDeniedError) {
+    if (
+      err instanceof AuthenticationError ||
+      err instanceof PermissionDeniedError
+    ) {
       return new TtsException(
         'TTS_PROVIDER_AUTH_ERROR',
         `OpenAI authentication failed (HTTP ${(err as AuthenticationError).status}): ${err.message}`,
@@ -101,7 +104,7 @@ export class OpenAiProvider implements ITtsProvider {
     if (isNetworkError) {
       return new TtsException(
         'TTS_PROVIDER_UNAVAILABLE',
-        `OpenAI network error: ${(err as Error).message}`,
+        `OpenAI network error: ${err.message}`,
         err,
       );
     }
