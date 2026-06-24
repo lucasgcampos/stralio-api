@@ -12,12 +12,17 @@ import { TtsException } from '../exceptions/tts.exception';
 
 @Injectable()
 export class OpenAiProvider implements ITtsProvider {
-  private readonly client: OpenAI;
+  private client: OpenAI | undefined;
 
-  constructor(private readonly config: ConfigService) {
-    this.client = new OpenAI({
-      apiKey: this.config.get<string>('TTS_PROVIDER_API_KEY'),
-    });
+  constructor(private readonly config: ConfigService) {}
+
+  private getClient(): OpenAI {
+    if (!this.client) {
+      this.client = new OpenAI({
+        apiKey: this.config.get<string>('TTS_PROVIDER_API_KEY'),
+      });
+    }
+    return this.client;
   }
 
   async synthesize(text: string, voiceId?: string): Promise<Buffer> {
@@ -29,7 +34,7 @@ export class OpenAiProvider implements ITtsProvider {
     let response: Response;
 
     try {
-      response = await this.client.audio.speech.create({
+      response = await this.getClient().audio.speech.create({
         model,
         voice,
         input: text,
@@ -49,7 +54,7 @@ export class OpenAiProvider implements ITtsProvider {
 
   async checkAvailability(): Promise<boolean> {
     try {
-      await this.client.models.list();
+      await this.getClient().models.list();
       return true;
     } catch {
       return false;
