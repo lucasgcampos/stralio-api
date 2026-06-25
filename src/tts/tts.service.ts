@@ -61,7 +61,7 @@ export class TtsService implements OnModuleInit {
   // Public API
   // ---------------------------------------------------------------------------
 
-  speak(
+  async speak(
     text: string,
     voiceId?: string,
     obsScene?: string,

@@ -10,12 +10,17 @@ import { TtsException } from '../exceptions/tts.exception';
 
 @Injectable()
 export class ElevenLabsProvider implements ITtsProvider {
-  private readonly client: ElevenLabsClient;
+  private client: ElevenLabsClient | undefined;
 
-  constructor(private readonly config: ConfigService) {
-    this.client = new ElevenLabsClient({
-      apiKey: this.config.get<string>('TTS_PROVIDER_API_KEY'),
-    });
+  constructor(private readonly config: ConfigService) {}
+
+  private getClient(): ElevenLabsClient {
+    if (!this.client) {
+      this.client = new ElevenLabsClient({
+        apiKey: this.config.get<string>('TTS_PROVIDER_API_KEY'),
+      });
+    }
+    return this.client;
   }
 
   async synthesize(text: string, voiceId?: string): Promise<Buffer> {
@@ -30,7 +35,7 @@ export class ElevenLabsProvider implements ITtsProvider {
     let audioStream: NodeJS.ReadableStream;
 
     try {
-      audioStream = await this.client.textToSpeech.convert(voice, {
+      audioStream = await this.getClient().textToSpeech.convert(voice, {
         text,
         model_id: modelId,
         output_format: 'mp3_44100_128',
@@ -58,7 +63,7 @@ export class ElevenLabsProvider implements ITtsProvider {
 
   async checkAvailability(): Promise<boolean> {
     try {
-      await this.client.models.getAll();
+      await this.getClient().models.getAll();
       return true;
     } catch {
       return false;
