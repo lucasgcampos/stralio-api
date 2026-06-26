@@ -2,12 +2,15 @@
   "moduleFileExtensions": ["js", "json", "ts"],
   "rootDir": ".",
   "testEnvironment": "node",
-  "testRegex": ".e2e-spec.ts$",
+  "testRegex": ".*\\.e2e-spec\\.ts$",
   "transform": {
     "^.+\\.(t|j)s$": "ts-jest"
   },
   "moduleNameMapper": {
     "^src/(.*)$": "<rootDir>/../src/$1"
   },
-  "forceExit": true
+  "forceExit": true,
+  "transformIgnorePatterns": [
+    "node_modules/(?!(@stellar|@noble|axios)/)"
+  ]
 }

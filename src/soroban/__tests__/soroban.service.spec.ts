@@ -1,3 +1,17 @@
+// Mock Stellar SDK to avoid ESM import issues in tests
+jest.mock('@stellar/stellar-sdk', () => ({
+  Server: jest.fn().mockImplementation(() => ({
+    getEvents: jest.fn().mockResolvedValue({}),
+    getLatestLedger: jest.fn().mockResolvedValue(12345),
+  })),
+  rpc: {
+    Server: jest.fn().mockImplementation(() => ({
+      getEvents: jest.fn().mockResolvedValue({}),
+      getLatestLedger: jest.fn().mockResolvedValue(12345),
+    })),
+  },
+}));
+
 import { SorobanService } from '../soroban.service';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from 'src/shared/prisma/prisma.service';
