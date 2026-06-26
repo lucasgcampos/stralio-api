@@ -2,6 +2,8 @@ import dotenv from 'dotenv';
 import { Test, TestingModule } from '@nestjs/testing';
 
 dotenv.config({ path: './.env.test' });
+process.env.NODE_ENV = 'test';
+
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { App } from 'supertest/types';

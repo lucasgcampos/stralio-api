@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { ThrottlerModule } from '@nestjs/throttler';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
@@ -10,6 +11,18 @@ import { TtsModule } from './tts/tts.module';
 
 @Module({
   imports: [
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60000,
+        limit: 100,
+        name: 'short',
+      },
+      {
+        ttl: 600000,
+        limit: 500,
+        name: 'long',
+      },
+    ]),
     ConfigModule.forRoot({ isGlobal: true }),
     SharedModule,
     UsersModule,
