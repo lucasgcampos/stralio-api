@@ -1,7 +1,7 @@
 import { UsersService } from '../users.service';
 import { PrismaService } from 'src/shared/prisma/prisma.service';
 import { HashService } from 'src/shared/hash.service';
-import { User, Prisma } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 
 describe('UsersService', () => {
   let service: UsersService;
@@ -67,7 +67,7 @@ describe('UsersService', () => {
       };
 
       mockHashService.createHash.mockResolvedValue('hashedpassword');
-      mockPrisma.user.create.mockResolvedValue(mockUser as User);
+      mockPrisma.user.create.mockResolvedValue(mockUser);
 
       const result = await service.create(createInput);
 
