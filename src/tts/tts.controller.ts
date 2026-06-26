@@ -10,6 +10,7 @@ import {
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
+import { ThrottlerGuard, Throttle } from '@nestjs/throttler';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { LogsQueryDto } from './dto/logs-query.dto';
 import { SpeakDto } from './dto/speak.dto';
@@ -17,6 +18,7 @@ import { TtsService } from './tts.service';
 
 @Controller('tts')
 @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
+@UseGuards(ThrottlerGuard)
 export class TtsController {
   constructor(private readonly ttsService: TtsService) {}
 
@@ -24,8 +26,10 @@ export class TtsController {
    * POST /tts/speak
    * Accepts a SpeakDto, fires the TTS pipeline asynchronously, and returns
    * HTTP 202 with the operationId immediately.
+   * Limited to 10 requests/minute to prevent abuse.
    */
   @Post('speak')
+  @Throttle({ short: { limit: 10, ttl: 60000 } })
   // @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.ACCEPTED)
   async speak(@Body() dto: SpeakDto): Promise<{ operationId: string }> {
